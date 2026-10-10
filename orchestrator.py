@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 from typing import Tuple, Optional, Callable
 from agents import Runner
 from schemas import (
@@ -30,7 +31,7 @@ def evaluate_adversarial_quality_gate(memo: LaunchMemo, risk_rep: RiskReport) ->
             f"Automated Gate Failure: Memo attempted 'go' while risk is '{risk_rep.overall_risk_level}'."
         )
 
-    # Rule 2: Confidence score minimum
+    # Rule 2: Confidence score minimum for 'go'
     if memo.decision == "go" and memo.confidence_score < 0.70:
         raise AdversarialGateError(
             f"Automated Gate Failure: 'go' decision requires >= 0.70 confidence (got {memo.confidence_score})."
@@ -188,7 +189,8 @@ if __name__ == "__main__":
         "MedScribe: An autonomous agent for oncology clinical trial investigators that reads patient records, "
         "auto-populates trial eligibility forms, and drafts regulatory submissions."
     )
-    result = asyncio.run(run_launchlens(sample_pitch, offline=True))
+    is_offline = "--demo" in sys.argv or not bool(os.getenv("OPENAI_API_KEY"))
+    result = asyncio.run(run_launchlens(sample_pitch, offline=is_offline))
     print("\n" + "=" * 60)
     print("📋 FINAL CERTIFIED LAUNCH MEMO")
     print("=" * 60)
